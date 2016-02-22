@@ -5,12 +5,14 @@ Imagine is a small script to download images of the web, by providing a list of 
 
 Installation
 ------------
-Installing imagine can be done easily from this git repository:
+Installing imagine can be done easily from this git repository::
+
     pip install git+ssh://git@github.com:NotANormalNerd/imagine.git
 
 Running the script
 ------------------
 After installing the script can easily be run::
+
     imagine image-list.txt -d /some/place/big/
 
 Argument and Options
