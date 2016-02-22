@@ -7,7 +7,7 @@ Installation
 ------------
 Installing imagine can be done easily from this git repository::
 
-    pip install git+ssh://git@github.com:NotANormalNerd/imagine.git
+    pip install git+https://github.com/NotANormalNerd/imagine.git
 
 Running the script
 ------------------
