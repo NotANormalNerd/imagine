@@ -19,11 +19,11 @@ Argument and Options
 --------------------
 Imagine has the following command line options::
 
-    imagine --help
+    user@somesystem:~$ imagine --help
     Usage: imagine [OPTIONS] FILENAME
 
     Options:
-      --ignore-cert                Don't check certificate validity
-      --ignore-content-type        Don't check for image/* content-type
-      -d, --destination DIRECTORY
-      --help                       Show this message and exit.
+        --ignore-cert                Don't check certificate validity
+        --ignore-content-type        Don't check for image/* content-type
+        -d, --destination DIRECTORY  Save images to this directory, defaults to CWD
+        --help                       Show this message and exit.

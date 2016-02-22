@@ -76,7 +76,7 @@ def download_file(session, url, destination, verify=True):
 @click.option('--ignore-cert', is_flag=True, help="Don't check certificate validity")
 @click.option('--ignore-content-type', is_flag=True, help="Don't check for image/* content-type")
 @click.option('--destination', '-d', type=click.Path(exists=True, file_okay=False, resolve_path=True, writable=True),
-              default=os.getcwd())
+              default=os.getcwd(), help="Save images to this directory, defaults to CWD")
 def main(filename, ignore_cert, ignore_content_type, destination):
     if os.environ.get("IMAGINE_LOGGING", None):
         logging.config.fileConfig(os.environ.get("IMAGINE_LOGGING"))
