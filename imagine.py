@@ -1,3 +1,7 @@
+'''
+
+'''
+
 import logging
 import logging.config
 import os.path
@@ -86,6 +90,12 @@ def download_file(session, url, destination, verify=True):
               default=os.getcwd(), help="Save images to this directory, defaults to CWD")
 @click.option('--dry-run', is_flag=True, help="Don't download any images. Just check for availability.")
 def main(filename, ignore_cert, ignore_content_type, destination, dry_run):
+    '''
+    This was not written in TDD style development. Test have been added after the code has been basically finished.
+
+    First we check if we can use https (yay security), then we check if the server at least tries to sell us images.
+    At last we download the content of the url from the server and put it into the destination folder.
+    '''
     if os.environ.get("IMAGINE_LOGGING", None):
         logging.config.fileConfig(os.environ.get("IMAGINE_LOGGING"))
     else:
@@ -95,6 +105,7 @@ def main(filename, ignore_cert, ignore_content_type, destination, dry_run):
         for image_url in url_list:
             with requests.Session() as sess:
                 image_url = image_url.strip()
+
                 try:
                     https_url = check_https_available(session=sess, url=image_url, verify=(not ignore_cert))
 
@@ -110,6 +121,7 @@ def main(filename, ignore_cert, ignore_content_type, destination, dry_run):
                     logger.warning("Invalid URL was encountered: {url} "
                                    "URL must be in format http(s)://domain.tld/path_to_image". format(url=image_url))
                     continue
+
 
                 if content_type_check and not dry_run:
                     try:
