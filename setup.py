@@ -13,7 +13,7 @@ setup(
         'click<7',
         'requests<3'
     ),
-     entry_points={
+    entry_points={
         'console_scripts': [
             'imagine = imagine:main',
         ],

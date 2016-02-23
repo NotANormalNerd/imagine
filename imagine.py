@@ -46,7 +46,7 @@ def check_https_available(session, url, verify=True):
         response = session.head(get_https_url(url), verify=verify, allow_redirects=True, timeout=(1.0, 5.0))
         return response.url
     except requests.ConnectionError as e:
-        session.head(url, verify=verify, allow_redirects=True, timeout=(1.0,5.0))
+        session.head(url, verify=verify, allow_redirects=True, timeout=(1.0, 5.0))
         return False
 
 
