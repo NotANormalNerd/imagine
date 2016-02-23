@@ -3,6 +3,9 @@ Imagine
 
 Imagine is a small script to download images of the web, by providing a list of url via file.
 
+.. image:: https://travis-ci.org/NotANormalNerd/imagine.svg?branch=master
+    :target: https://travis-ci.org/NotANormalNerd/imagine
+
 Installation
 ------------
 Installing imagine can be done easily from this git repository::
