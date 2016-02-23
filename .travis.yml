@@ -5,4 +5,6 @@ python:
 # command to install dependencies
 install: "pip install -e ."
 # command to run tests
-script: py.test -s
+script:
+ - py.test -s
+ - py.test --pep8
