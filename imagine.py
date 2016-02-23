@@ -3,10 +3,12 @@ import logging.config
 import os.path
 import shutil
 import sys
+import uuid
 from urllib.parse import urlparse, urlunparse
 
 import click
 import requests
+import requests.exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +21,17 @@ def get_https_url(url):
     :return: Source URL with HTTPS as protocol
     '''
     parse_result = list(urlparse(url))
+    logger.debug("URLPARSE Result: {}".format(parse_result))
     parse_result[0] = 'https'
     return urlunparse(parse_result)
 
 
-def check_https_available(session, url, verify):
+def check_https_available(session, url, verify=True):
     '''
     Make a HEAD call against the URL to see if the server supports HTTPS.
     Wait for some seconds before failing.
+    Check if server is available for http if https fails.
+    Raises requests.ConnectionError if no server is available.
 
     :param session: The requests session or object
     :param url: The URL to be called
@@ -37,9 +42,8 @@ def check_https_available(session, url, verify):
         response = session.head(get_https_url(url), verify=verify, allow_redirects=True, timeout=(1.0, 5.0))
         return response.url
     except requests.ConnectionError as e:
+        session.head(url, verify=verify, allow_redirects=True, timeout=(1.0,5.0))
         return False
-    except requests.URLRequired as e:
-        logger.warning()
 
 
 def check_image_type(session, url, verify=True):
@@ -58,6 +62,7 @@ def check_image_type(session, url, verify=True):
 def download_file(session, url, destination, verify=True):
     '''
     Download the image and save it to disk.
+    Does not overwrite existing images by prefixing image names.
 
     :param session: The requests session or object
     :param url: The URL to be called
@@ -67,8 +72,10 @@ def download_file(session, url, destination, verify=True):
     response = session.get(url,
                            verify=verify,
                            stream=True)
-    with open(os.path.join(destination, os.path.basename(url)), 'w+b') as image_file:
+    unique_filename = "-".join((uuid.uuid4().hex[:6], os.path.basename(url)))
+    with open(os.path.join(destination, unique_filename), 'w+b') as image_file:
         shutil.copyfileobj(response.raw, image_file)
+    logger.info("Successfully downloaded image to {}".format(os.path.join(destination, unique_filename)))
 
 
 @click.command()
@@ -77,7 +84,8 @@ def download_file(session, url, destination, verify=True):
 @click.option('--ignore-content-type', is_flag=True, help="Don't check for image/* content-type")
 @click.option('--destination', '-d', type=click.Path(exists=True, file_okay=False, resolve_path=True, writable=True),
               default=os.getcwd(), help="Save images to this directory, defaults to CWD")
-def main(filename, ignore_cert, ignore_content_type, destination):
+@click.option('--dry-run', is_flag=True, help="Don't download any images. Just check for availability.")
+def main(filename, ignore_cert, ignore_content_type, destination, dry_run):
     if os.environ.get("IMAGINE_LOGGING", None):
         logging.config.fileConfig(os.environ.get("IMAGINE_LOGGING"))
     else:
@@ -87,16 +95,29 @@ def main(filename, ignore_cert, ignore_content_type, destination):
         for image_url in url_list:
             with requests.Session() as sess:
                 image_url = image_url.strip()
-                https_url = check_https_available(session=sess, url=image_url, verify=(not ignore_cert))
+                try:
+                    https_url = check_https_available(session=sess, url=image_url, verify=(not ignore_cert))
 
-                if https_url:
-                    image_url = https_url
+                    if https_url:
+                        image_url = https_url
 
-                content_type_check = True if ignore_content_type \
-                    else check_image_type(session=sess, url=image_url, verify=(not ignore_cert))
+                    content_type_check = True if ignore_content_type \
+                        else check_image_type(session=sess, url=image_url, verify=(not ignore_cert))
+                except requests.ConnectionError as e:
+                    logger.warning("Server was not found. Will skip download for: {url}".format(url=image_url))
+                    continue
+                except requests.exceptions.InvalidURL as e:
+                    logger.warning("Invalid URL was encountered: {url} "
+                                   "URL must be in format http(s)://domain.tld/path_to_image". format(url=image_url))
+                    continue
 
-                if content_type_check:
-                    download_file(session=sess, url=image_url, verify=(not ignore_cert), destination=destination)
+                if content_type_check and not dry_run:
+                    try:
+                        download_file(session=sess, url=image_url, verify=(not ignore_cert), destination=destination)
+                    except requests.ConnectionError as e:
+                        logger.warning("Something went wrong while downloading the file. "
+                                       "Will skip download for: {url} "
+                                       "Reason: {reason}".format(url=image_url, reason=e.strerror))
                 else:
                     logger.warning("Non image content-type detected. "
                                    "Will skip download for: {url}".format(url=image_url))
