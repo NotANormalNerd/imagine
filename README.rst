@@ -12,6 +12,14 @@ Installing imagine can be done easily from this git repository::
 
     pip install git+https://github.com/NotANormalNerd/imagine.git
 
+Imagine will try and use https regardless of the protocol specified in the file and will fallback in case the server does not offer https.
+
+All URLs have to be in the schema http(s)://somedomain.tld/path/to/image.jpg. URLs missing that schema will be skipped with a warning.
+
+Logging can be setup by providing a path to a python fileConfig_ file via the environment variable IMAGINE_LOGGING
+
+.. _fileConfig: https://docs.python.org/2/library/logging.config.html#configuration-file-format
+
 Running the script
 ------------------
 After installing the script can easily be run::
