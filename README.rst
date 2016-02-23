@@ -26,7 +26,10 @@ Imagine has the following command line options::
     Usage: imagine [OPTIONS] FILENAME
 
     Options:
-        --ignore-cert                Don't check certificate validity
-        --ignore-content-type        Don't check for image/* content-type
-        -d, --destination DIRECTORY  Save images to this directory, defaults to CWD
-        --help                       Show this message and exit.
+      --ignore-cert                Don't check certificate validity
+      --ignore-content-type        Don't check for image/* content-type
+      -d, --destination DIRECTORY  Save images to this directory, defaults to CWD
+      --dry-run                    Don't download any images. Just check for
+                                   availability.
+      --help                       Show this message and exit.
+
